@@ -1,0 +1,32 @@
+def greeting='Hello'
+
+pipeline {
+    agent any
+    parameters {
+        choice (name:'lang', choices:['English', 'Spain', "French"], description:'language')
+        string (name:'name', defaultValue:'haifeng', description:'your name')
+    }
+    stages {
+        stage('get value') {
+            steps {
+                echo "${params.lang}"
+                echo "${params.name}"
+            }
+        }
+        stage('set value') {
+            steps {
+                script {
+                    if (params.lang=='French') greeting = 'Bonjour'
+                    else if (params.lang=='Spain') greeting = 'Hola'
+                }
+            }
+        }
+        stage('greeting') {
+            steps {
+                script {
+                    echo "${greeting} ${params.name}"
+                }
+            }
+        }
+    }
+}
