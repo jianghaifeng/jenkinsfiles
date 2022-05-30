@@ -2,6 +2,7 @@ def greeting='Hello'
 
 pipeline {
     agent any
+    options { timestamps() }
     parameters {
         choice (name:'lang', choices:['English', 'Spain', "French"], description:'language')
         string (name:'name', defaultValue:'haifeng', description:'your name')
@@ -25,6 +26,16 @@ pipeline {
             steps {
                 script {
                     echo "${greeting} ${params.name}"
+                }
+            }
+        }
+        stage('test') {
+            steps {
+                script {
+                    sh """
+                        a='hello'
+                        echo "\$a"
+                    """
                 }
             }
         }
