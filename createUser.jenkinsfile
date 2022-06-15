@@ -1,0 +1,36 @@
+def name
+def pass
+
+pipeline {
+    agent any
+    
+    parameters {
+        string (name:'email', defaultValue:'test@hello.com', description:'user email')
+    }
+
+    stages {
+        stage("add user") {
+            steps {
+                script {
+                    if (params.email.length() > 0) {
+                        pass = sh(returnStdout: true, script: "cat /dev/urandom | tr -dc '[:alpha:]' | fold -w \${1:-10} | head -c 10")
+                        def pos = params.email.indexOf('@')
+                        name = params.email.substring(0, pos)
+                        println name + ":" + pass
+                        jenkins.model.Jenkins.instance.securityRealm.createAccount(name, pass)
+                    }
+                }
+            }
+        }
+    }
+    
+    post { 
+        success { 
+            echo "user ${params.email} added."
+            emailext body: '''username: ${name} \n password: ${pass}''',
+            recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], 
+            subject: 'Your Jenkins account has been generated!',
+            to: params.email
+        }
+    }
+}
